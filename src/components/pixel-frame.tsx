@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { PixelHeart } from "@/components/pixel-art";
@@ -35,6 +36,8 @@ export interface PixelFrameProps {
   /** mat / placeholder tint */
   tint?: string;
   className?: string;
+  /** true for the photos above the fold — they load eagerly (no lazy delay) */
+  priority?: boolean;
 }
 
 /**
@@ -48,17 +51,9 @@ export function PixelFrame({
   caption,
   tint = "#ffe3f1",
   className,
+  priority = false,
 }: PixelFrameProps) {
   const [loaded, setLoaded] = React.useState(false);
-  const imgRef = React.useRef<HTMLImageElement>(null);
-
-  // Catch images that finished loading (from cache) before React attached the
-  // onLoad handler. Until a real image loads, the placeholder stays visible —
-  // so a missing/404 photo never flashes a broken-image icon.
-  React.useEffect(() => {
-    const img = imgRef.current;
-    if (img && img.complete && img.naturalWidth > 0) setLoaded(true);
-  }, [src]);
 
   return (
     <figure
@@ -78,17 +73,21 @@ export function PixelFrame({
           <span className="retro text-[10px] text-primary/70">ADD PHOTO</span>
         </div>
         {src ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            ref={imgRef}
+          <Image
             src={src}
             alt={alt}
-            loading="lazy"
-            decoding="async"
+            fill
+            // Photos are ~1 col on phones, 2 on tablets, 3 on desktop (max-w-4xl).
+            // This lets Next serve a tiny, correctly-sized image per device
+            // instead of the multi-megabyte original.
+            sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
+            quality={70}
+            priority={priority}
+            loading={priority ? undefined : "lazy"}
             onLoad={() => setLoaded(true)}
             style={{ imageRendering: "auto" }}
             className={cn(
-              "relative block h-full w-full object-cover transition-opacity duration-300",
+              "relative block object-cover transition-opacity duration-300",
               loaded ? "opacity-100" : "opacity-0"
             )}
             draggable={false}

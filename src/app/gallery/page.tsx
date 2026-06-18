@@ -12,8 +12,10 @@ import {
   PixelStar,
 } from "@/components/pixel-art";
 
-// render fresh each request in dev so newly-added photos show up on reload
-export const dynamic = "force-dynamic";
+// Photos are read from disk at build time, so prerender the gallery to static
+// HTML for instant, zero-compute loads in production. (The dev server still
+// re-runs this on every reload, so newly-added photos show up while editing.)
+export const dynamic = "force-static";
 
 /**
  * Captions, assigned to photos by sorted file order (slot 0 = first file, …).
@@ -187,6 +189,7 @@ export default function GalleryPage() {
                   caption={s.caption}
                   tint={s.tint}
                   alt={s.caption}
+                  priority={i < 3}
                 />
               </div>
             </div>

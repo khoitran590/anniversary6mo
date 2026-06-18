@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -18,6 +18,14 @@ const pixelify = Pixelify_Sans({
 export const metadata: Metadata = {
   title: "Happy Anniversary My Princess 👑",
   description: "A little 8-bit love letter for our anniversary.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // allow pinch-zoom for accessibility; cap to avoid accidental huge zoom
+  maximumScale: 5,
+  themeColor: "#ffd1e6",
 };
 
 export default function RootLayout({
