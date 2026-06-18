@@ -31,7 +31,9 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
+# .env.local holds the Google Maps API key — keep it out of git
 .env*
+.env.local
 
 # vercel
 .vercel

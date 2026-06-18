@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Pixelify_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const pressStart = Press_Start_2P({
@@ -33,11 +34,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   return (
     <html
       lang="en"
       className={`${pressStart.variable} ${pixelify.variable} h-full antialiased`}
     >
+      <head>
+        {mapsApiKey && (
+          <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}`}
+            strategy="beforeInteractive"
+          />
+        )}
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

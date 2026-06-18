@@ -3,14 +3,17 @@ import path from "node:path";
 
 import Link from "next/link";
 
-import { PixelFrame, PixelBorder } from "@/components/pixel-frame";
+import { PixelBorder } from "@/components/pixel-frame";
 import {
   PixelCrown,
   PixelHeart,
+  PixelHydrangea,
   PixelLily,
+  PixelPeony,
   PixelSparkle,
   PixelStar,
 } from "@/components/pixel-art";
+import { MapGallery } from "@/components/map-gallery";
 
 // Photos are read from disk at build time, so prerender the gallery to static
 // HTML for instant, zero-compute loads in production. (The dev server still
@@ -18,28 +21,96 @@ import {
 export const dynamic = "force-static";
 
 /**
- * Captions, assigned to photos by sorted file order (slot 0 = first file, …).
- * Edit any line to change that slot's caption; reorder your files (or rename
- * them, e.g. 01.jpg, 02.jpg) to control which photo lands where. If you have
- * more photos than captions, the list simply repeats.
+ * Location-based photo groups with coordinates and captions.
+ * Each location can have multiple photos. Photos are matched by index order.
  */
-const CAPTIONS = [
-  "Your first gift for me ☀️",
-  "First bouquet of flowers 💐",
-  "I love how we look at each other 💕",
-  "Early anni trip to Joshua Tree 🌵",
-  "Made another bouquet just for GF day 💖",
-  "Just because bouquet 🌸" ,
-  "Our first film photo 🎥",
-  "Your birthday gift 🎁",
-  "Our first EDC together 🎉",
-  "My favorite holding hand photo 🙈",
-  "Your first gift for me ☀️",
-  "I admire your beauty 💋",
-  "How I imagine us posing in the future 🤩",
-  "1st actual hiking trip 🥾",
-  "Our first milky way photo 🌌",
-
+const LOCATIONS = [
+  {
+    id: "home",
+    name: "Home 🏠",
+    lat: 34.0522,
+    lng: -118.2437,
+    captions: [
+      "Your first gift for me ☀️",
+      "First bouquet of flowers 💐",
+    ],
+    photoIndices: [0, 1],
+  },
+  {
+    id: "joshua-tree",
+    name: "Joshua Tree 🌵",
+    lat: 34.1411,
+    lng: -116.2023,
+    captions: [
+      "Early anni trip to Joshua Tree 🌵",
+      "Our first milky way photo 🌌",
+    ],
+    photoIndices: [3, 14],
+  },
+  {
+    id: "edc",
+    name: "EDC 🎉",
+    lat: 36.0726,
+    lng: -115.1843,
+    captions: [
+      "Our first EDC together 🎉",
+    ],
+    photoIndices: [8],
+  },
+  {
+    id: "hiking",
+    name: "Hiking Trail 🥾",
+    lat: 34.4265,
+    lng: -117.4473,
+    captions: [
+      "1st actual hiking trip 🥾",
+      "My favorite holding hand photo 🙈",
+    ],
+    photoIndices: [13, 9],
+  },
+  {
+    id: "studio",
+    name: "Photo Studio 📸",
+    lat: 34.0195,
+    lng: -118.4912,
+    captions: [
+      "Our first film photo 🎥",
+      "I admire your beauty 💋",
+      "How I imagine us posing in the future 🤩",
+    ],
+    photoIndices: [6, 11, 12],
+  },
+  {
+    id: "flowers",
+    name: "Flower Shop 🌸",
+    lat: 34.0522,
+    lng: -118.2650,
+    captions: [
+      "Made another bouquet just for GF day 💖",
+      "Just because bouquet 🌸",
+    ],
+    photoIndices: [4, 5],
+  },
+  {
+    id: "birthday",
+    name: "Birthday Spot 🎁",
+    lat: 34.0628,
+    lng: -118.4473,
+    captions: [
+      "Your birthday gift 🎁",
+    ],
+    photoIndices: [7],
+  },
+  {
+    id: "memories",
+    name: "Special Moment 💕",
+    lat: 33.9733,
+    lng: -118.3910,
+    captions: [
+      "I love how we look at each other 💕",
+    ],
+    photoIndices: [2],
+  },
 ];
 
 // pastel mat colours, cycled across the frames
@@ -52,7 +123,6 @@ const TINTS = [
   "#ffe9d6",
 ];
 
-const PLACEHOLDER_COUNT = 8;
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
 
 /** Auto-discover every image dropped into public/photos (any filename works). */
@@ -68,53 +138,55 @@ function getPhotos(): string[] {
   }
 }
 
-/** Deterministic pseudo-random in [0,1) from a seed — stable across renders so
- *  the scatter doesn't reshuffle on every request. */
-function seeded(n: number): number {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-type Slot = {
-  src?: string;
-  caption: string;
-  rot: number; // subtle tilt (degrees) for the scattered scrapbook look
-  tint: string;
-};
-
-/** One frame per photo (or placeholder frames when the folder is empty). The
- *  frames flow in a responsive multi-column collage that reflows to fit any
- *  screen — 1 column on phones, 2 on tablets, 3 on desktop — so every photo
- *  stays big, fully visible, and never clips or overlaps. */
-function buildSlots(): Slot[] {
-  const photos = getPhotos();
-  const count = photos.length > 0 ? photos.length : PLACEHOLDER_COUNT;
-  return Array.from({ length: count }, (_, i) => {
-    const file = photos[i];
-    return {
-      src: file ? `/photos/${encodeURIComponent(file)}` : undefined,
-      caption: CAPTIONS[i % CAPTIONS.length],
-      rot: (seeded(i * 3 + 2) - 0.5) * 8, // ±4°
-      tint: TINTS[i % TINTS.length],
-    };
-  });
-}
-
-// scattered background sprites
+/* Scattered 8-bit flowers + hearts that drift behind the whole page. Spread
+   down the full scroll height (top%) and out to both edges (left%) so the
+   garden frames the map and photos without ever sitting on top of them.
+   `hide` thins the garden on phones, where the content runs nearly edge-to-edge
+   and a full scatter would crowd the map and intro text. */
 const SPRITES = [
-  { el: <PixelHeart pixel={6} />, top: "4%", left: "62%", cls: "animate-float" },
-  { el: <PixelSparkle pixel={6} color="#fff3b0" />, top: "24%", left: "8%", cls: "animate-twinkle" },
-  { el: <PixelStar pixel={6} color="#ffffff" />, top: "47%", left: "70%", cls: "animate-bob" },
-  { el: <PixelHeart pixel={5} color="#ff8fb8" highlight="#fff" />, top: "70%", left: "92%", cls: "animate-float" },
-  { el: <PixelSparkle pixel={5} />, top: "88%", left: "10%", cls: "animate-twinkle" },
-  { el: <PixelStar pixel={5} color="#ffd0e2" />, top: "66%", left: "37%", cls: "animate-bob" },
+  { el: <PixelHeart pixel={6} />, top: "3%", left: "4%", cls: "animate-float" },
+  { el: <PixelHydrangea pixel={6} />, top: "6%", left: "91%", cls: "animate-bob" },
+  { el: <PixelPeony pixel={6} />, top: "12%", left: "1%", cls: "animate-float", hide: true },
+  { el: <PixelLily pixel={5} />, top: "16%", left: "94%", cls: "animate-bob", hide: true },
+  { el: <PixelSparkle pixel={5} color="#fff3b0" />, top: "22%", left: "6%", cls: "animate-twinkle" },
+  { el: <PixelHeart pixel={5} color="#ff8fb8" highlight="#fff" />, top: "28%", left: "95%", cls: "animate-float", hide: true },
+  { el: <PixelHydrangea pixel={5} petal="#c4a3ff" center="#ece2ff" />, top: "36%", left: "2%", cls: "animate-bob", hide: true },
+  { el: <PixelPeony pixel={5} petal="#ffa3c4" highlight="#ffe0ec" />, top: "44%", left: "93%", cls: "animate-float" },
+  { el: <PixelStar pixel={5} color="#ffffff" />, top: "50%", left: "5%", cls: "animate-bob" },
+  { el: <PixelLily pixel={6} />, top: "56%", left: "95%", cls: "animate-float", hide: true },
+  { el: <PixelHeart pixel={6} />, top: "62%", left: "1%", cls: "animate-float", hide: true },
+  { el: <PixelHydrangea pixel={6} />, top: "68%", left: "92%", cls: "animate-bob" },
+  { el: <PixelPeony pixel={6} />, top: "74%", left: "4%", cls: "animate-float" },
+  { el: <PixelSparkle pixel={5} />, top: "80%", left: "94%", cls: "animate-twinkle", hide: true },
+  { el: <PixelLily pixel={5} />, top: "86%", left: "3%", cls: "animate-bob", hide: true },
+  { el: <PixelHydrangea pixel={5} petal="#9db8ff" />, top: "90%", left: "91%", cls: "animate-float" },
+  { el: <PixelPeony pixel={5} />, top: "94%", left: "6%", cls: "animate-bob", hide: true },
+  { el: <PixelHeart pixel={5} color="#ff8fb8" highlight="#fff" />, top: "96%", left: "92%", cls: "animate-float" },
 ];
 
 export default function GalleryPage() {
-  const slots = buildSlots();
+  const photos = getPhotos();
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-pastel-blue">
+      {/* floating 8-bit garden behind everything (hearts + flowers).
+          The outer span owns position + responsive scale/visibility; the inner
+          span owns the drift animation, so the scale transform never fights the
+          keyframes. On phones the garden is scaled down and thinned (`hide`). */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        {SPRITES.map((s, i) => (
+          <span
+            key={i}
+            className={`absolute origin-center scale-[0.6] sm:scale-100 ${
+              s.hide ? "hidden sm:inline-block" : "inline-block"
+            }`}
+            style={{ top: s.top, left: s.left }}
+          >
+            <span className={`inline-block ${s.cls}`}>{s.el}</span>
+          </span>
+        ))}
+      </div>
+
       {/* sticky top bar */}
       <header className="sticky top-0 z-50 flex items-center justify-between gap-2 border-b-[6px] border-foreground bg-pastel-blue/90 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
         <Link
@@ -156,49 +228,17 @@ export default function GalleryPage() {
       {/* intro line */}
       <div className="relative z-10 px-5 pt-8 text-center">
         <p className="retro text-[10px] leading-relaxed text-primary sm:text-xs">
-          every little moment, spread out just for you 💖
+          every little moment, spread out across our journey 📍💖
         </p>
       </div>
 
-      {/* photo collage — a responsive multi-column scrapbook you scroll through.
-          Reflows from 1 column on phones up to 3 on desktop, so every photo
-          stays big, fully visible, and never clips or overlaps. */}
-      <section className="relative mx-auto w-full max-w-4xl px-5 pb-28 pt-6 sm:px-4">
-        {/* floating sprites (behind the photos) */}
-        <div className="pointer-events-none absolute inset-0 z-0">
-          {SPRITES.map((s, i) => (
-            <span
-              key={i}
-              className={`absolute ${s.cls}`}
-              style={{ top: s.top, left: s.left }}
-            >
-              {s.el}
-            </span>
-          ))}
-        </div>
-
-        <div className="relative z-10 columns-1 gap-7 sm:columns-2 lg:columns-3">
-          {slots.map((s, i) => (
-            <div
-              key={s.src ?? i}
-              className="mb-7 break-inside-avoid"
-              style={{ transform: `rotate(${s.rot}deg)` }}
-            >
-              <div
-                className="animate-pop"
-                style={{ animationDelay: `${Math.min(i * 60, 1200)}ms` }}
-              >
-                <PixelFrame
-                  src={s.src}
-                  caption={s.caption}
-                  tint={s.tint}
-                  alt={s.caption}
-                  priority={i < 3}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* map gallery section */}
+      <section className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-28 pt-6">
+        <MapGallery
+          locations={LOCATIONS}
+          photos={photos}
+          tints={TINTS}
+        />
       </section>
 
       {/* closing note */}

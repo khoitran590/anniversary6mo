@@ -207,3 +207,90 @@ export function PixelLily({
     />
   );
 }
+
+// a mophead hydrangea: a rounded ball of tiny florets (b) with lighter
+// center dots (c), on a leafy green stem.
+const HYDRANGEA = [
+  "...bbbbb...",
+  ".bbcbcbcbb.",
+  "bcbcbcbcbcb",
+  "bbcbcbcbcbb",
+  "bcbcbcbcbcb",
+  ".bbcbcbcbb.",
+  "...bbbbb...",
+  "....GGG....",
+  "...lG.Gl...",
+  "..llG.Gll..",
+  "...llGll...",
+  ".....G.....",
+  ".....G.....",
+];
+
+export function PixelHydrangea({
+  petal = "#9db8ff",
+  center = "#d8e3ff",
+  stem = "#4fae6f",
+  leaf = "#79cf95",
+  pixel = 6,
+  className,
+  ...props
+}: {
+  petal?: string;
+  center?: string;
+  stem?: string;
+  leaf?: string;
+} & Omit<PixelArtProps, "grid" | "colors">) {
+  return (
+    <PixelArt
+      grid={HYDRANGEA}
+      colors={{ b: petal, c: center, G: stem, l: leaf }}
+      pixel={pixel}
+      className={className}
+      {...props}
+    />
+  );
+}
+
+// a full, fluffy peony: layered ruffled petals (p) with lighter highlights (h),
+// on a leafy green stem.
+const PEONY = [
+  "...ppppp...",
+  "..ppphppp..",
+  ".pphpphpph.",
+  "pphpphpphpp",
+  "phphphphphp",
+  "pphpphpphpp",
+  ".pphpphpph.",
+  "..ppphppp..",
+  "...ppppp...",
+  ".....G.....",
+  "...l.G.l...",
+  "..ll.G.ll..",
+  "...llGll...",
+  ".....G.....",
+];
+
+export function PixelPeony({
+  petal = "#ff7aa8",
+  highlight = "#ffc4da",
+  stem = "#4fae6f",
+  leaf = "#79cf95",
+  pixel = 6,
+  className,
+  ...props
+}: {
+  petal?: string;
+  highlight?: string;
+  stem?: string;
+  leaf?: string;
+} & Omit<PixelArtProps, "grid" | "colors">) {
+  return (
+    <PixelArt
+      grid={PEONY}
+      colors={{ p: petal, h: highlight, G: stem, l: leaf }}
+      pixel={pixel}
+      className={className}
+      {...props}
+    />
+  );
+}
