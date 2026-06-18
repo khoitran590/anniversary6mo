@@ -22,6 +22,7 @@ export const dynamic = "force-dynamic";
  * more photos than captions, the list simply repeats.
  */
 const CAPTIONS = [
+  "Your first gift for me ☀️",
   "First time carrying you 💑",
   "Your first bouquet of flowers 💐",
   "Love how we look at each other 💕",
@@ -32,7 +33,7 @@ const CAPTIONS = [
   "Your birthday gift 🎁",
   "Our first EDC 🎉",
   "My favorite holding hand photo 🙈",
-  "Your first gift for me ☀️",
+
   "I admire your beauty 💋",
   "How I imagine us posing in the future 🤩",
   "1st actual hiking trip 🥾",
@@ -76,47 +77,26 @@ function seeded(n: number): number {
 type Slot = {
   src?: string;
   caption: string;
-  left: number; // % of board width (centre of the frame)
-  top: number; // px from the top of the board
-  rot: number; // degrees
-  maxW: number; // px
+  rot: number; // subtle tilt (degrees) for the scattered scrapbook look
   tint: string;
-  z: number;
 };
 
-// scatter tuning — rows are spaced enough that no frame covers another, so
-// every photo stays fully visible while rotation + jitter keep it playful.
-const COLS = 3;
-const LANES = [22, 50, 78]; // base horizontal centres (%)
-const ROW_STEP = 320; // px between rows (> frame height ⇒ no overlap)
-const TOP_START = 24; // px before the first row
-
-/** Build one frame per photo (or placeholder frames when the folder is empty),
- *  scattered + rotated like photos tossed on the floor, and the total board
- *  height needed to hold them all. */
-function buildLayout(): { slots: Slot[]; boardHeight: number } {
+/** One frame per photo (or placeholder frames when the folder is empty). The
+ *  frames flow in a responsive multi-column collage that reflows to fit any
+ *  screen — 1 column on phones, 2 on tablets, 3 on desktop — so every photo
+ *  stays big, fully visible, and never clips or overlaps. */
+function buildSlots(): Slot[] {
   const photos = getPhotos();
   const count = photos.length > 0 ? photos.length : PLACEHOLDER_COUNT;
-
-  const slots: Slot[] = Array.from({ length: count }, (_, i) => {
+  return Array.from({ length: count }, (_, i) => {
     const file = photos[i];
-    const col = i % COLS;
-    const row = Math.floor(i / COLS);
     return {
       src: file ? `/photos/${encodeURIComponent(file)}` : undefined,
       caption: CAPTIONS[i % CAPTIONS.length],
-      left: LANES[col] + (seeded(i * 2 + 1) - 0.5) * 8, // lane ±4%
-      top: TOP_START + row * ROW_STEP + (seeded(i * 7 + 3) - 0.5) * 32, // ±16px
-      rot: (seeded(i * 3 + 2) - 0.5) * 16, // ±8°
-      maxW: 150 + Math.round(seeded(i * 5 + 4) * 52), // 150–202px
+      rot: (seeded(i * 3 + 2) - 0.5) * 8, // ±4°
       tint: TINTS[i % TINTS.length],
-      z: 1 + Math.floor(seeded(i * 11 + 6) * 60),
     };
   });
-
-  const rows = Math.ceil(count / COLS);
-  const boardHeight = TOP_START + (rows - 1) * ROW_STEP + 340;
-  return { slots, boardHeight };
 }
 
 // scattered background sprites
@@ -130,7 +110,7 @@ const SPRITES = [
 ];
 
 export default function GalleryPage() {
-  const { slots, boardHeight } = buildLayout();
+  const slots = buildSlots();
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-pastel-blue">
@@ -175,14 +155,12 @@ export default function GalleryPage() {
         </p>
       </div>
 
-      {/* scatter board — photos tossed on the floor; grows tall so you scroll
-          down through them. Height is computed to fit however many you add. */}
-      <section
-        className="relative mx-auto mt-6 w-full max-w-6xl px-3"
-        style={{ height: `${boardHeight}px` }}
-      >
-        {/* floating sprites */}
-        <div className="pointer-events-none absolute inset-0">
+      {/* photo collage — a responsive multi-column scrapbook you scroll through.
+          Reflows from 1 column on phones up to 3 on desktop, so every photo
+          stays big, fully visible, and never clips or overlaps. */}
+      <section className="relative mx-auto w-full max-w-4xl px-5 pb-28 pt-6 sm:px-4">
+        {/* floating sprites (behind the photos) */}
+        <div className="pointer-events-none absolute inset-0 z-0">
           {SPRITES.map((s, i) => (
             <span
               key={i}
@@ -194,33 +172,27 @@ export default function GalleryPage() {
           ))}
         </div>
 
-        {slots.map((s, i) => (
-          <div
-            key={s.src ?? i}
-            className="absolute"
-            style={{
-              left: `${s.left}%`,
-              top: `${s.top}px`,
-              zIndex: s.z,
-              transform: `translateX(-50%) rotate(${s.rot}deg)`,
-            }}
-          >
+        <div className="relative z-10 columns-1 gap-7 sm:columns-2 lg:columns-3">
+          {slots.map((s, i) => (
             <div
-              className="animate-pop"
-              style={{
-                width: `clamp(120px, 30vw, ${s.maxW}px)`,
-                animationDelay: `${Math.min(i * 70, 1400)}ms`,
-              }}
+              key={s.src ?? i}
+              className="mb-7 break-inside-avoid"
+              style={{ transform: `rotate(${s.rot}deg)` }}
             >
-              <PixelFrame
-                src={s.src}
-                caption={s.caption}
-                tint={s.tint}
-                alt={s.caption}
-              />
+              <div
+                className="animate-pop"
+                style={{ animationDelay: `${Math.min(i * 60, 1200)}ms` }}
+              >
+                <PixelFrame
+                  src={s.src}
+                  caption={s.caption}
+                  tint={s.tint}
+                  alt={s.caption}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
 
       {/* closing note */}

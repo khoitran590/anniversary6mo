@@ -20,8 +20,9 @@ const DETAILS: {
   value: string;
   chip: string;
 }[] = [
-  { label: "LOCATION", value: "A fancy restaurant", chip: "bg-mint" },
+  { label: "LOCATION", value: "NOBU Restaurant", chip: "bg-mint" },
   { label: "DATE", value: "June 27, 2026", chip: "bg-sun" },
+  { label: "TIME", value: "9:00 PM", chip: "bg-sun" },
   {
     label: "DRESS CODE",
     value: "White or black — as long as my princess is comfortable",
@@ -72,15 +73,15 @@ export default function InvitationPage() {
             INVITED
           </span>
         </h1>
-        <p className="retro text-[10px] text-primary sm:text-xs">
-          a date with your prince 💖
+        <p className="retro text-[14px] text-primary sm:text-sm">
+          A date with your lulumelonnnnn 💖
         </p>
 
         {/* invitation card */}
         <div className="relative w-full bg-cream p-6 pixel-box-shadow sm:p-8">
           <div className="mb-5 flex items-center justify-center gap-3">
             <PixelHeart pixel={4} />
-            <span className="retro text-[10px] text-primary sm:text-xs">
+            <span className="retro text-[12px] text-primary sm:text-xs">
               SAVE THE DATE
             </span>
             <PixelHeart pixel={4} />

@@ -63,7 +63,7 @@ export function PixelFrame({
   return (
     <figure
       className={cn(
-        "relative select-none bg-cream p-2 pixel-box-shadow",
+        "relative select-none bg-cream p-3 pixel-box-shadow",
         className
       )}
     >
@@ -74,8 +74,8 @@ export function PixelFrame({
       >
         {/* placeholder always sits behind; the photo fades in once it loads */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <PixelHeart pixel={6} color="#ff85b3" highlight="#fff" />
-          <span className="retro text-[8px] text-primary/70">ADD PHOTO</span>
+          <PixelHeart pixel={7} color="#ff85b3" highlight="#fff" />
+          <span className="retro text-[10px] text-primary/70">ADD PHOTO</span>
         </div>
         {src ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -98,7 +98,7 @@ export function PixelFrame({
 
       {/* caption strip */}
       {caption ? (
-        <figcaption className="retro mt-2 px-1 text-center text-[8px] leading-relaxed text-primary">
+        <figcaption className="retro mt-3 px-1 text-center text-[10px] leading-relaxed text-primary sm:text-[11px]">
           {caption}
         </figcaption>
       ) : (
