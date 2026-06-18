@@ -20,9 +20,9 @@ const DETAILS: {
   value: string;
   chip: string;
 }[] = [
-  { label: "LOCATION", value: "NOBU Restaurant", chip: "bg-mint" },
+  { label: "LOCATION", value: "Shorebird Restaurant", chip: "bg-mint" },
   { label: "DATE", value: "June 27, 2026", chip: "bg-sun" },
-  { label: "TIME", value: "9:00 PM", chip: "bg-sun" },
+  { label: "TIME", value: "7:00 PM", chip: "bg-sun" },
   {
     label: "DRESS CODE",
     value: "White or black — as long as my princess is comfortable",

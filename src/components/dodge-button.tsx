@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/8bit/button";
 import { cn } from "@/lib/utils";
 
 /** how close (px) the cursor may get before the button flees */
-const THRESHOLD = 110;
+const THRESHOLD = 100;
 /** keep the button this far from every viewport edge when it teleports */
 const EDGE_MARGIN = 24;
 

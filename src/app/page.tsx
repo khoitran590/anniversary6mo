@@ -8,6 +8,7 @@ import { DodgeButton } from "@/components/dodge-button";
 import {
   PixelCrown,
   PixelHeart,
+  PixelLily,
   PixelSparkle,
   PixelStar,
 } from "@/components/pixel-art";
@@ -15,8 +16,8 @@ import {
 const TEASES = [
   "not ready? you can't escape! 🏃‍♀️💨",
   "hehe, catch me first 😝",
-  "love always wins 💕",
-  "just click READY, silly 👑",
+  "pls don't run away babi 😩",
+  "just click READY my queen 👑",
   "okay okay, pretty please? 🥺",
   "you're stuck with me forever 💖",
 ];
@@ -68,6 +69,70 @@ const DECOR: Decor[] = [
     el: <PixelHeart pixel={4} color="#ff6fa6" highlight="#ffd9e8" />,
     className: "animate-float",
     style: { bottom: "30%", left: "44%", animationDelay: ".75s" },
+  },
+
+  // lilies scattered around the edges
+  {
+    el: <PixelLily pixel={5} />,
+    className: "animate-float",
+    style: { top: "30%", left: "3%", animationDelay: ".4s" },
+  },
+  {
+    el: <PixelLily pixel={4} petal="#ffa6cf" />,
+    className: "animate-bob",
+    style: { top: "15%", right: "5%", animationDelay: ".8s" },
+  },
+  {
+    el: <PixelLily pixel={5} />,
+    className: "animate-float",
+    style: { bottom: "20%", right: "4%", animationDelay: ".25s" },
+  },
+  {
+    el: <PixelLily pixel={4} petal="#ff7ab0" />,
+    className: "animate-bob",
+    style: { bottom: "7%", left: "26%", animationDelay: ".6s" },
+  },
+  {
+    el: <PixelLily pixel={4} />,
+    className: "animate-float",
+    style: { top: "54%", right: "12%", animationDelay: "1s" },
+  },
+  {
+    el: <PixelLily pixel={4} petal="#ffa6cf" />,
+    className: "animate-bob",
+    style: { top: "4%", left: "70%", animationDelay: ".5s" },
+  },
+
+  // a few more hearts
+  {
+    el: <PixelHeart pixel={5} />,
+    className: "animate-bob",
+    style: { top: "36%", left: "13%", animationDelay: ".15s" },
+  },
+  {
+    el: <PixelHeart pixel={4} color="#ff8fb8" highlight="#ffe2ee" />,
+    className: "animate-float",
+    style: { top: "5%", left: "28%", animationDelay: ".9s" },
+  },
+  {
+    el: <PixelHeart pixel={6} />,
+    className: "animate-float",
+    style: { bottom: "42%", right: "11%", animationDelay: ".35s" },
+  },
+  {
+    el: <PixelHeart pixel={4} color="#ff6fa6" highlight="#ffd9e8" />,
+    className: "animate-bob",
+    style: { top: "72%", right: "9%", animationDelay: ".7s" },
+  },
+  {
+    el: <PixelHeart pixel={5} color="#ff8fb8" highlight="#fff" />,
+    className: "animate-float",
+    style: { bottom: "6%", right: "33%", animationDelay: "1.1s" },
+  },
+  {
+    el: <PixelHeart pixel={4} />,
+    className: "animate-bob",
+    style: { top: "50%", left: "16%", animationDelay: ".55s" },
   },
 ];
 
