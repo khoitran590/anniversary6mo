@@ -73,7 +73,7 @@ export default function InvitationPage() {
             INVITED
           </span>
         </h1>
-        <p className="retro text-[14px] text-primary sm:text-sm">
+        <p className="retro text-center text-[14px] text-primary sm:text-sm">
           A date with your lulumelonnnnn 💖
         </p>
 

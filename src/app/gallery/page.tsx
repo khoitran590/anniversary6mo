@@ -116,21 +116,25 @@ export default function GalleryPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-pastel-blue">
       {/* sticky top bar */}
-      <header className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b-[6px] border-foreground bg-pastel-blue/90 px-4 py-3 backdrop-blur">
+      <header className="sticky top-0 z-50 flex items-center justify-between gap-2 border-b-[6px] border-foreground bg-pastel-blue/90 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
         <Link
           href="/"
-          className="retro relative inline-flex items-center gap-2 bg-secondary px-4 py-3 text-[10px] text-primary active:translate-y-0.5 sm:text-xs"
+          className="retro relative inline-flex shrink-0 items-center gap-1.5 bg-secondary px-3 py-2.5 text-[9px] text-primary active:translate-y-0.5 sm:gap-2 sm:px-4 sm:py-3 sm:text-xs"
         >
           ← BACK
           <PixelBorder t={5} />
         </Link>
 
-        <div className="flex items-center gap-2">
-          <PixelCrown pixel={5} />
-          <h1 className="retro text-[11px] text-primary sm:text-sm">
+        <div className="flex min-w-0 items-center justify-center gap-1.5 sm:gap-2">
+          <span className="shrink-0">
+            <PixelCrown pixel={4} />
+          </span>
+          <h1 className="retro whitespace-nowrap text-[9px] text-primary sm:text-sm">
             OUR MEMORIES
           </h1>
-          <PixelCrown pixel={5} />
+          <span className="shrink-0">
+            <PixelCrown pixel={4} />
+          </span>
         </div>
 
         {/* lily → secret invitation */}
@@ -138,13 +142,13 @@ export default function GalleryPage() {
           href="/invitation"
           aria-label="Open your invitation"
           title="A little something for you…"
-          className="group flex items-center gap-2 active:translate-y-0.5"
+          className="group flex shrink-0 items-center gap-2 active:translate-y-0.5"
         >
           <span className="retro hidden text-[8px] text-primary/70 transition-colors group-hover:text-primary md:inline">
             tap me 💌
           </span>
           <span className="animate-bob transition-transform group-hover:scale-110">
-            <PixelLily pixel={5} />
+            <PixelLily pixel={4} />
           </span>
         </Link>
       </header>
