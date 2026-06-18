@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   8-BIT ANNIVERSARY THEME
+   Soft pastel palette + chunky pixel "ink" used for borders & text.
+   Dark mode is intentionally kept identical so the OS theme never washes out
+   the pastels.
+---------------------------------------------------------------------------- */
+
+:root {
+  --radius: 0px;
+
+  /* default page background (pastel pink) — pages override as needed */
+  --background: #ffd1e6;
+  --foreground: #2d2a4a; /* deep indigo "ink" for borders + text */
+
+  --card: #fff7fc;
+  --card-foreground: #2d2a4a;
+
+  --popover: #fff7fc;
+  --popover-foreground: #2d2a4a;
+
+  --primary: #2d2a4a;
+  --primary-foreground: #fff5fb;
+
+  --secondary: #ffe3f1;
+  --secondary-foreground: #2d2a4a;
+
+  --muted: #ffe3f1;
+  --muted-foreground: #6f6088;
+
+  --accent: #b6f5cd; /* mint */
+  --accent-foreground: #2d2a4a;
+
+  --destructive: #ff6ea3; /* rose */
+  --destructive-foreground: #fff5fb;
+
+  --border: #2d2a4a;
+  --input: #2d2a4a;
+  --ring: #2d2a4a;
+
+  /* themed extras */
+  --pastel-pink: #ffd1e6;
+  --pastel-blue: #c6e8ff;
+  --mint: #b6f5cd;
+  --rose: #ff85b3;
+  --sun: #ffe27a;
+  --cream: #fff7fc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-pastel-pink: var(--pastel-pink);
+  --color-pastel-blue: var(--pastel-blue);
+  --color-mint: var(--mint);
+  --color-rose: var(--rose);
+  --color-sun: var(--sun);
+  --color-cream: var(--cream);
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --font-sans: var(--font-pixel), "Pixelify Sans", system-ui, sans-serif;
+  --font-retro: "Press Start 2P", var(--font-press-start), system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+/* Crisp upscaling for pixel art */
+img {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ---------- 8-bit utilities ---------- */
+
+/* chunky stair-stepped drop shadow for big retro headings */
+.pixel-text-shadow {
+  text-shadow:
+    3px 0 0 var(--foreground),
+    -3px 0 0 var(--foreground),
+    0 3px 0 var(--foreground),
+    0 -3px 0 var(--foreground),
+    3px 3px 0 var(--foreground),
+    -3px 3px 0 var(--foreground),
+    3px -3px 0 var(--foreground),
+    -3px -3px 0 var(--foreground),
+    6px 6px 0 rgba(45, 42, 74, 0.35);
+}
+
+/* solid blocky shadow for cards / frames */
+.pixel-box-shadow {
+  box-shadow: 8px 8px 0 0 var(--foreground);
+}
+
+.pixel-box-shadow-sm {
+  box-shadow: 5px 5px 0 0 var(--foreground);
+}
+
+/* gentle bob + sway animations for floating decorations */
+@keyframes pixel-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pixel-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--bob-rot, 0deg));
+  }
+  50% {
+    transform: translateY(-6px) rotate(var(--bob-rot, 0deg));
+  }
+}
+
+@keyframes pixel-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pixel-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.animate-float {
+  animation: pixel-float 3.5s ease-in-out infinite;
+}
+.animate-bob {
+  animation: pixel-bob 4s ease-in-out infinite;
+}
+.animate-pop {
+  animation: pixel-pop 0.4s steps(4) both;
+}
+.animate-twinkle {
+  animation: pixel-twinkle 2.2s steps(3) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-bob,
+  .animate-pop,
+  .animate-twinkle {
+    animation: none;
+  }
+}
