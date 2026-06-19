@@ -70,7 +70,7 @@ export function PixelFrame({
         {/* placeholder always sits behind; the photo fades in once it loads */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
           <PixelHeart pixel={7} color="#ff85b3" highlight="#fff" />
-          <span className="retro text-[10px] text-primary/70">ADD PHOTO</span>
+          <span className="retro text-xs text-primary/70">ADD PHOTO</span>
         </div>
         {src ? (
           <Image
@@ -97,7 +97,7 @@ export function PixelFrame({
 
       {/* caption strip */}
       {caption ? (
-        <figcaption className="retro mt-3 px-1 text-center text-[10px] leading-relaxed text-primary sm:text-[11px]">
+        <figcaption className="retro mt-3 px-1 text-center text-xs leading-relaxed text-primary sm:text-[13px]">
           {caption}
         </figcaption>
       ) : (

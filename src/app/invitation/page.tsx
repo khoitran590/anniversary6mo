@@ -60,7 +60,7 @@ export default function InvitationPage() {
       {/* back to gallery */}
       <Link
         href="/gallery"
-        className="pixel-btn retro absolute left-5 top-5 z-20 inline-flex items-center gap-2 bg-secondary px-4 py-3 text-[10px] text-primary sm:text-xs"
+        className="pixel-btn retro absolute left-5 top-5 z-20 inline-flex items-center gap-2 bg-secondary px-4 py-3 text-xs text-primary sm:text-sm"
       >
         ← BACK
         <PixelBorder t={5} />
@@ -79,7 +79,7 @@ export default function InvitationPage() {
             INVITED
           </span>
         </h1>
-        <p className="retro text-center text-[14px] text-primary sm:text-sm">
+        <p className="retro text-center text-base text-primary sm:text-lg">
           A date with your lulumelonnnnn 💖
         </p>
 
@@ -87,7 +87,7 @@ export default function InvitationPage() {
         <div className="relative w-full bg-cream p-6 pixel-box-shadow sm:p-8">
           <div className="mb-5 flex items-center justify-center gap-3">
             <PixelHeart pixel={4} />
-            <span className="retro text-[12px] text-primary sm:text-xs">
+            <span className="retro text-sm text-primary sm:text-sm">
               SAVE THE DATE
             </span>
             <PixelHeart pixel={4} />
@@ -103,11 +103,11 @@ export default function InvitationPage() {
                   <div className="border-t-4 border-dashed border-foreground/70" />
                 )}
                 <div className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
-                  <dt className="retro text-[10px] text-muted-foreground sm:text-xs">
+                  <dt className="retro text-xs text-muted-foreground sm:text-sm">
                     {d.label}
                   </dt>
                   <dd
-                    className={`retro pixel-box-shadow-sm inline-block max-w-full border-4 border-foreground px-3 py-2 text-[9px] leading-relaxed text-primary sm:text-right sm:text-[11px] ${d.chip}`}
+                    className={`retro pixel-box-shadow-sm inline-block max-w-full border-4 border-foreground px-3 py-2 text-[11px] leading-relaxed text-primary sm:text-right sm:text-[13px] ${d.chip}`}
                   >
                     {d.value}
                   </dd>
@@ -126,7 +126,7 @@ export default function InvitationPage() {
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-2">
             <PixelCrown pixel={5} />
-            <p className="retro text-[10px] text-primary sm:text-xs">
+            <p className="retro text-xs text-primary sm:text-sm">
               can&apos;t wait to see you there
             </p>
             <PixelCrown pixel={5} />

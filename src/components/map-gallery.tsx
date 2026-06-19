@@ -195,13 +195,13 @@ export function MapGallery({ locations, photos, tints }: MapGalleryProps) {
               key={selectedLocation.id}
               className="retro animate-pop rounded-lg border-4 border-foreground bg-secondary p-4 shadow-md"
             >
-              <h3 className="flex items-center gap-2 text-sm font-bold text-primary">
+              <h3 className="flex items-center gap-2 text-base font-bold text-primary">
                 <span className="inline-block animate-heartbeat">
                   <PixelHeart pixel={4} color="#ff69b4" />
                 </span>
                 {selectedLocation.name}
               </h3>
-              <p className="mt-1 text-[10px] text-primary/80">
+              <p className="mt-1 text-xs text-primary/80">
                 {selectedPhotos.length} {selectedPhotos.length === 1 ? "memory" : "memories"}
               </p>
             </div>
@@ -226,7 +226,7 @@ export function MapGallery({ locations, photos, tints }: MapGalleryProps) {
         ) : (
           <div className="retro flex flex-col items-center justify-center gap-3 rounded-lg border-4 border-dashed border-foreground/30 p-8 text-center">
             <PixelHeart pixel={6} color="#ff69b4" />
-            <p className="text-xs text-primary/70">
+            <p className="text-sm text-primary/70">
               click a location pin to see our memories 💕
             </p>
           </div>

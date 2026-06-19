@@ -1,4 +1,9 @@
 @import "tailwindcss";
+/* Load NES.css into Tailwind's `base` layer. There its `.nes-*` component
+   classes out-specify the preflight element resets (so buttons keep their
+   styling), while Tailwind utilities — which live in the higher `utilities`
+   layer — still win over NES's reboot resets like `main { display:block }`. */
+@import "nes.css/css/nes.min.css" layer(base);
 
 /* ----------------------------------------------------------------------------
    8-BIT ANNIVERSARY THEME
@@ -256,6 +261,41 @@ img {
   animation: marquee 9s linear infinite;
 }
 
+/* ---------- Game Boy clamshell (landing page) ---------- */
+
+/* the lid swings up from the hinge when the page first loads */
+@keyframes lid-open {
+  0% { transform: rotateX(-176deg); }
+  70% { transform: rotateX(8deg); }
+  100% { transform: rotateX(-4deg); }
+}
+.animate-lid-open {
+  transform-origin: bottom center;
+  transform-style: preserve-3d;
+  animation: lid-open 1.5s cubic-bezier(0.22, 0.85, 0.3, 1) 0.35s both;
+}
+
+/* uniform vertical scroll of the on-screen message (text is duplicated so the
+   loop is seamless; we translate by exactly half the stack) */
+@keyframes marquee-y {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.animate-marquee-y {
+  animation: marquee-y 11s linear infinite;
+}
+
+/* soft power-on flicker for the screen as the lid finishes opening */
+@keyframes screen-on {
+  0%, 60% { opacity: 0; }
+  68% { opacity: 0.4; }
+  72% { opacity: 0.1; }
+  80%, 100% { opacity: 1; }
+}
+.animate-screen-on {
+  animation: screen-on 2s ease-out 0.35s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
   .animate-bob,
@@ -264,8 +304,14 @@ img {
   .animate-jiggle,
   .animate-heartbeat,
   .eq-bar,
-  .animate-marquee {
+  .animate-marquee,
+  .animate-marquee-y,
+  .animate-lid-open,
+  .animate-screen-on {
     animation: none;
+  }
+  .animate-lid-open {
+    transform: rotateX(-4deg);
   }
   .pixel-btn {
     transition: none;

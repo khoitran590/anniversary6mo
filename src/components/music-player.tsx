@@ -50,6 +50,7 @@ interface YTPlayer {
   getCurrentTime(): number;
   getDuration(): number;
   getPlayerState(): number;
+  getVideoData(): { title?: string; author?: string; video_id?: string };
 }
 
 interface YTPlayerEvent {
@@ -127,6 +128,7 @@ export function MusicPlayer({ playlist }: { playlist?: string }) {
   const [minimized, setMinimized] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [title, setTitle] = useState("");
 
   const source = playlist ? parseSource(playlist) : null;
   const sourceKey = source ? `${source.kind}:${source.id}` : "";
@@ -151,10 +153,14 @@ export function MusicPlayer({ playlist }: { playlist?: string }) {
           modestbranding: 1,
           rel: 0,
           playsinline: 1,
+          autoplay: 1, // start the moment the invitation opens
         },
         events: {
-          onReady: () => {
-            if (!cancelled) setReady(true);
+          onReady: (e) => {
+            if (cancelled) return;
+            setReady(true);
+            // kick playback off automatically when the page loads
+            e.target.playVideo();
           },
           onStateChange: (e) => {
             if (cancelled) return;
@@ -178,6 +184,8 @@ export function MusicPlayer({ playlist }: { playlist?: string }) {
       if (!p) return;
       setCurrent(p.getCurrentTime());
       setDuration(p.getDuration());
+      const t = p.getVideoData?.().title;
+      if (t) setTitle(t);
     }, 400);
     return () => window.clearInterval(id);
   }, [ready]);
@@ -201,107 +209,173 @@ export function MusicPlayer({ playlist }: { playlist?: string }) {
 
   return (
     <div
-      className="relative w-full select-none overflow-hidden rounded-[14px] border-[5px] border-[#a9d8cc] bg-[#efe9d5] shadow-[6px_6px_0_0_rgba(45,42,74,0.25)]"
+      /* NES.css design language: flat teal, square corners, chunky ink border
+         and a hard pixel drop-shadow — no gradients, no soft shadows */
+      className="pixel-box-shadow relative mx-auto w-full max-w-[360px] select-none border-4 border-[#2d2a4a] bg-[#19c1d6] px-5 pb-7 pt-5 sm:px-6"
     >
-      {/* title bar */}
-      <div className="flex items-center justify-between gap-2 border-b-[3px] border-[#a9d8cc] px-3 py-2">
-        <span className="text-sm font-bold text-[#2d2a4a] sm:text-base">
-          Your music
-        </span>
-        <div className="flex items-center gap-3 text-[#2d2a4a]">
-          <button
-            type="button"
-            aria-label={minimized ? "Restore player" : "Minimize player"}
-            onClick={() => setMinimized((m) => !m)}
-            className="pixel-btn leading-none"
-          >
-            <WindowGlyph kind="min" />
-          </button>
-          <span aria-hidden className="opacity-70">
-            <WindowGlyph kind="max" />
+      {/* ===== screen bezel (flat dark plastic around the LCD) ===== */}
+      <div className="border-4 border-[#2d2a4a] bg-[#2d2a4a] px-4 pb-3 pt-4">
+        {/* power LED + "POWER" caption — a blocky pixel, not a glowing dot */}
+        <div className="mb-2 flex items-center gap-1.5">
+          <span
+            className={`inline-block h-2 w-2 ${
+              playing ? "bg-[#e76e55]" : "bg-[#7a2f2f]"
+            }`}
+          />
+          <span className="text-[6px] font-bold tracking-[0.2em] text-[#9a93b0]">
+            POWER
           </span>
-          <button
-            type="button"
-            aria-label="Minimize player"
-            onClick={() => setMinimized(true)}
-            className="pixel-btn leading-none"
-          >
-            <WindowGlyph kind="close" />
-          </button>
+        </div>
+
+        {/* ===== the LCD screen — flat greenish Game Boy panel ===== */}
+        <div className="overflow-hidden border-4 border-[#1b1825] bg-[#9bbc4f] px-3 py-3 text-[#1b3a1b]">
+          {source ? (
+            <>
+              {/* now playing + bouncing equalizer */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[9px] font-bold tracking-[0.18em]">
+                  ♪ NOW PLAYING
+                </span>
+                <div className="flex h-3 items-end gap-[2px]">
+                  {[0, 1, 2, 3].map((i) => (
+                    <span
+                      key={i}
+                      className={`w-[3px] bg-[#1b3a1b] ${playing ? "eq-bar" : ""}`}
+                      style={{
+                        height: "100%",
+                        animationDelay: `${i * 0.12}s`,
+                        transform: playing ? undefined : "scaleY(0.25)",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* current song title — scrolls if it overflows the screen */}
+              <div className="mt-1.5 overflow-hidden whitespace-nowrap">
+                {title.length > 28 ? (
+                  <div className="animate-marquee inline-block">
+                    <span className="text-[10px] font-bold">{title}</span>
+                    <span className="px-6 text-[10px] font-bold">{title}</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] font-bold">
+                    {title || "loading…"}
+                  </span>
+                )}
+              </div>
+
+              {/* seek bar drawn as a chunky LCD progress meter */}
+              <div
+                role="slider"
+                aria-label="Seek"
+                aria-valuemin={0}
+                aria-valuemax={Math.round(duration)}
+                aria-valuenow={Math.round(current)}
+                tabIndex={0}
+                onClick={seek}
+                className="mt-3 h-3 w-full cursor-pointer border-[3px] border-[#1b3a1b] bg-[#88aa44]"
+              >
+                <div
+                  className="h-full bg-[#1b3a1b]"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+
+              <div className="mt-1.5 flex justify-between text-[9px] font-bold tabular-nums">
+                <span>{formatTime(current)}</span>
+                <span>{duration ? formatTime(duration) : "--:--"}</span>
+              </div>
+            </>
+          ) : (
+            <p className="py-2 text-center text-[9px] font-bold leading-relaxed">
+              INSERT A SONG ♥<br />
+              paste a YouTube link to play
+            </p>
+          )}
+        </div>
+
+        {/* the colorful "GAME BOY COLOR" wordmark below the screen */}
+        <div className="mt-2 flex items-center justify-center gap-1 text-[10px] font-extrabold italic tracking-tight">
+          <span className="text-[#e8e4ec]">YOUR MUSIC</span>
+          <span className="text-[#ff5f8d]">C</span>
+          <span className="text-[#ffd23f]">O</span>
+          <span className="text-[#4fd1ff]">L</span>
+          <span className="text-[#8aff6a]">O</span>
+          <span className="text-[#ff5f8d]">R</span>
         </div>
       </div>
 
-      {/* body — hidden when "minimized", music keeps playing */}
+      {/* ===== controls deck ===== */}
       {!minimized && (
-        <div className="px-5 py-6 sm:px-8 sm:py-7">
-          {/* transport controls */}
-          <div className="mb-6 flex items-center justify-center gap-7">
-            <TransportButton
-              label="Previous track"
-              disabled={!ready}
-              onClick={() => player?.previousVideo()}
-            >
-              <PrevIcon />
-            </TransportButton>
+        <div className="mt-6 flex items-start justify-between">
+          {/* D-pad — left/right step tracks, A is play */}
+          <DPad
+            ready={ready}
+            onPrev={() => player?.previousVideo()}
+            onNext={() => player?.nextVideo()}
+          />
 
-            <TransportButton
+          {/* A / B round buttons, set on the diagonal like the real console */}
+          <div className="flex -translate-y-1 items-end gap-3">
+            <RoundButton
+              label="Minimize player"
+              variant="is-error"
+              disabled={false}
+              onClick={() => setMinimized(true)}
+              letter="B"
+            >
+              <StopIcon />
+            </RoundButton>
+            <RoundButton
               label={playing ? "Pause" : "Play"}
+              variant="is-success"
               disabled={!ready}
               onClick={togglePlay}
-              big
+              letter="A"
+              className="-translate-y-3"
             >
               {playing ? <PauseIcon /> : <PlayIcon />}
-            </TransportButton>
-
-            <TransportButton
-              label="Next track"
-              disabled={!ready}
-              onClick={() => player?.nextVideo()}
-            >
-              <NextIcon />
-            </TransportButton>
-          </div>
-
-          {/* seek bar */}
-          <div className="flex items-center gap-3">
-            <div
-              role="slider"
-              aria-label="Seek"
-              aria-valuemin={0}
-              aria-valuemax={Math.round(duration)}
-              aria-valuenow={Math.round(current)}
-              tabIndex={0}
-              onClick={seek}
-              className="group relative h-3 flex-1 cursor-pointer rounded-full bg-[#d6cfb4]"
-            >
-              {/* filled portion */}
-              <div
-                className="absolute left-0 top-0 h-full rounded-full bg-[#2d2a4a]"
-                style={{ width: `${pct}%` }}
-              />
-              {/* knob */}
-              <div
-                className="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-[#2d2a4a] bg-[#efe9d5] shadow-sm transition-transform group-hover:scale-110"
-                style={{ left: `${pct}%` }}
-              />
-            </div>
-          </div>
-
-          {/* time / hint line */}
-          <div className="mt-2 flex justify-between text-[10px] text-[#2d2a4a]/70">
-            {source ? (
-              <>
-                <span>{formatTime(current)}</span>
-                <span>{duration ? formatTime(duration) : "--:--"}</span>
-              </>
-            ) : (
-              <span className="mx-auto text-center">
-                paste your YouTube song or playlist link to play 💌
-              </span>
-            )}
+            </RoundButton>
           </div>
         </div>
       )}
+
+      {/* restore handle when minimized */}
+      {minimized && (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setMinimized(false)}
+            className="nes-btn pixel-btn !text-[8px] !tracking-widest"
+          >
+            ▲ OPEN
+          </button>
+        </div>
+      )}
+
+      {/* START / SELECT pills */}
+      <div className="mt-6 flex items-center justify-center gap-5">
+        <PillButton
+          label="Previous track"
+          disabled={!ready}
+          onClick={() => player?.previousVideo()}
+          caption="SELECT"
+        />
+        <PillButton
+          label="Next track"
+          disabled={!ready}
+          onClick={() => player?.nextVideo()}
+          caption="START"
+        />
+      </div>
+
+      {/* speaker grille — blocky square pixels, bottom-right like the GBC */}
+      <div className="mt-4 ml-auto grid w-fit grid-cols-5 gap-[5px]">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <span key={i} className="h-1 w-1 bg-[#2d2a4a]" />
+        ))}
+      </div>
 
       {/* hidden YouTube engine (audio only — controls live above) */}
       {source && (
@@ -313,42 +387,124 @@ export function MusicPlayer({ playlist }: { playlist?: string }) {
   );
 }
 
-/* ---------- transport button + icons ---------- */
+/* ---------- Game Boy controls ---------- */
 
-function TransportButton({
+function jiggle(e: React.MouseEvent<HTMLButtonElement>, onClick: () => void) {
+  const el = e.currentTarget;
+  el.classList.remove("animate-jiggle");
+  void el.offsetWidth; // reflow so the animation can re-fire on rapid clicks
+  el.classList.add("animate-jiggle");
+  onClick();
+}
+
+/* directional pad. Up/down are decorative; left = prev, right = next. */
+function DPad({
+  onPrev,
+  onNext,
+  ready,
+}: {
+  onPrev: () => void;
+  onNext: () => void;
+  ready: boolean;
+}) {
+  const arm = "absolute bg-[#2d2a4a]";
+  return (
+    <div className="relative h-[78px] w-[78px]">
+      {/* vertical + horizontal arms — flat squared cross */}
+      <div className={`${arm} left-1/2 top-0 h-full w-[26px] -translate-x-1/2`} />
+      <div className={`${arm} top-1/2 left-0 h-[26px] w-full -translate-y-1/2`} />
+      {/* center dimple */}
+      <div className="absolute left-1/2 top-1/2 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2 bg-[#1f1c2a]" />
+
+      {/* left = previous */}
+      <button
+        type="button"
+        aria-label="Previous track"
+        disabled={!ready}
+        onClick={(e) => jiggle(e, onPrev)}
+        onAnimationEnd={(e) => e.currentTarget.classList.remove("animate-jiggle")}
+        className="pixel-btn absolute top-1/2 left-0 flex h-[26px] w-[26px] -translate-y-1/2 items-center justify-center text-[#cfc9dd] disabled:opacity-40"
+      >
+        <PrevIcon />
+      </button>
+      {/* right = next */}
+      <button
+        type="button"
+        aria-label="Next track"
+        disabled={!ready}
+        onClick={(e) => jiggle(e, onNext)}
+        onAnimationEnd={(e) => e.currentTarget.classList.remove("animate-jiggle")}
+        className="pixel-btn absolute top-1/2 right-0 flex h-[26px] w-[26px] -translate-y-1/2 items-center justify-center text-[#cfc9dd] disabled:opacity-40"
+      >
+        <NextIcon />
+      </button>
+    </div>
+  );
+}
+
+/* square A / B buttons built from NES.css `nes-btn` chips */
+function RoundButton({
   children,
   label,
+  letter,
+  variant,
   onClick,
   disabled,
-  big = false,
+  className = "",
 }: {
   children: React.ReactNode;
   label: string;
+  letter: string;
+  variant: "is-success" | "is-error";
   onClick: () => void;
   disabled?: boolean;
-  big?: boolean;
+  className?: string;
 }) {
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const el = e.currentTarget;
-    el.classList.remove("animate-jiggle");
-    void el.offsetWidth; // reflow so the animation can re-fire on rapid clicks
-    el.classList.add("animate-jiggle");
-    onClick();
-  };
-
   return (
-    <button
-      type="button"
-      aria-label={label}
-      disabled={disabled}
-      onClick={handleClick}
-      onAnimationEnd={(e) => e.currentTarget.classList.remove("animate-jiggle")}
-      className={`pixel-btn inline-flex items-center justify-center text-[#2d2a4a] disabled:cursor-not-allowed disabled:opacity-40 ${
-        big ? "h-12 w-12" : "h-9 w-9"
-      }`}
-    >
-      {children}
-    </button>
+    <div className={`flex flex-col items-center gap-1 ${className}`}>
+      <button
+        type="button"
+        aria-label={label}
+        disabled={disabled}
+        onClick={(e) => jiggle(e, onClick)}
+        onAnimationEnd={(e) => e.currentTarget.classList.remove("animate-jiggle")}
+        className={`nes-btn pixel-btn ${variant} !m-0 !flex !h-11 !w-11 items-center justify-center !p-0 disabled:cursor-not-allowed disabled:opacity-40`}
+      >
+        <span className="h-5 w-5 text-white">{children}</span>
+      </button>
+      <span className="text-[10px] font-extrabold italic text-[#0c5566]">
+        {letter}
+      </span>
+    </div>
+  );
+}
+
+/* flat START / SELECT pills — squared blocks, no gloss */
+function PillButton({
+  label,
+  caption,
+  onClick,
+  disabled,
+}: {
+  label: string;
+  caption: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex -rotate-[20deg] flex-col items-center gap-1">
+      <button
+        type="button"
+        aria-label={label}
+        disabled={disabled}
+        onClick={(e) => jiggle(e, onClick)}
+        onAnimationEnd={(e) => e.currentTarget.classList.remove("animate-jiggle")}
+        className="pixel-btn h-3 w-9 border-2 border-[#1f1c2a] bg-[#2d2a4a] disabled:opacity-40"
+      />
+      <span className="text-[6px] font-bold tracking-[0.15em] text-[#0c5566]">
+        {caption}
+      </span>
+    </div>
   );
 }
 
@@ -387,38 +543,10 @@ function NextIcon() {
   );
 }
 
-/* tiny window-chrome glyphs: _  □  × */
-function WindowGlyph({ kind }: { kind: "min" | "max" | "close" }) {
-  if (kind === "min") {
-    return (
-      <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
-        <rect x="3" y="11" width="10" height="2.5" fill="currentColor" />
-      </svg>
-    );
-  }
-  if (kind === "max") {
-    return (
-      <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
-        <rect
-          x="3"
-          y="3"
-          width="10"
-          height="10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-        />
-      </svg>
-    );
-  }
+function StopIcon() {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
-      <path
-        d="M4 4 L12 12 M12 4 L4 12"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 24 24" className="h-full w-full" aria-hidden>
+      <rect x="6" y="6" width="12" height="12" fill="currentColor" />
     </svg>
   );
 }

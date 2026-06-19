@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/8bit/button";
 import { DodgeButton } from "@/components/dodge-button";
 import {
   PixelCrown,
@@ -184,50 +183,122 @@ export default function LandingPage() {
       >
         {/* crown */}
         <div className="animate-float">
-          <PixelCrown pixel={9} />
+          <PixelCrown pixel={7} />
         </div>
 
-        {/* title */}
-        <h1 className="retro flex flex-col gap-3 text-white">
-          <span className="pixel-text-shadow text-3xl leading-tight sm:text-4xl md:text-5xl">
-            HAPPY
-          </span>
-          <span className="pixel-text-shadow text-2xl leading-tight sm:text-3xl md:text-5xl">
-            ANNIVERSARY
-          </span>
-          <span className="pixel-text-shadow text-2xl leading-tight text-[#fff0a6] sm:text-3xl md:text-5xl">
-            MY PRINCESS
-          </span>
-        </h1>
+{/* ===== Game Boy Advance SP — 1.5x SCALED ===== */}
+<div id="gameboy-container" style={{ perspective: "1600px" }} className="w-[450px] max-w-[92vw]">
+          {/* ----- LID (top half, hinges up) ----- */}
+          <div className="animate-lid-open relative z-20 rounded-t-[27px] rounded-b-[12px] border-[4px] border-b-0 border-[#5b9bd5] bg-gradient-to-b from-[#b9def7] to-[#8fc6ee] px-6 pb-4 pt-7 shadow-[0_-6px_15px_rgba(45,42,74,0.15)]">
+            {/* screen bezel */}
+            <div className="rounded-[12px] bg-[#23202f] px-6 pb-4 pt-6">
+              {/* the LCD — message scrolls uniformly if it overflows */}
+              <div className="animate-screen-on relative h-[225px] overflow-hidden rounded-[4px] border-[4px] border-[#0e0c16] bg-gradient-to-b from-[#eaf6ff] to-[#cfe9ff]">
+                {/* scanline sheen */}
+                <div
+                  className="pointer-events-none absolute inset-0 z-10 opacity-30"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(0deg,transparent 0 4px,rgba(255,255,255,0.5) 4px 6px)",
+                  }}
+                />
+                <div className="animate-marquee-y">
+                  {[0, 1].map((dup) => (
+                    <div
+                      key={dup}
+                      aria-hidden={dup === 1}
+                      className="flex flex-col items-center gap-2 py-9 text-center"
+                    >
+                      <PixelHeart pixel={6} />
+                      <span className="retro mt-3 text-lg leading-tight text-[#2452a6]">
+                        HAPPY
+                      </span>
+                      <span className="retro text-lg leading-tight text-[#2452a6]">
+                        ANNIVERSARY
+                      </span>
+                      <span className="retro text-xs leading-tight text-[#c2477e]">
+                        MY PRINCESS
+                      </span>
+                      <PixelHeart pixel={6} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* GAME BOY ADVANCE SP wordmark under the screen */}
+              <p className="mt-3 text-center text-[10px] font-extrabold italic tracking-tight text-[#cfe9ff]">
+                GAME BOY ADVANCE SP
+              </p>
+            </div>
+          </div>
 
-        {/* heart divider */}
+          {/* hinge band */}
+          <div className="relative z-30 -my-[3px] h-[18px] rounded-[4px] border-x-[4px] border-[#5b9bd5] bg-gradient-to-b from-[#7bb8e8] to-[#5b9bd5]" />
+
+          {/* ----- BASE (bottom half, the controls) ----- */}
+          <div className="relative z-10 rounded-b-[27px] rounded-t-[12px] border-[4px] border-t-0 border-[#5b9bd5] bg-gradient-to-b from-[#a8d4f0] to-[#8fc6ee] px-7 pb-9 pt-7">
+            <div className="flex items-start justify-between">
+              {/* decorative D-pad */}
+              <div className="relative mt-1 h-[87px] w-[87px]">
+                <div className="absolute left-1/2 top-0 h-full w-[30px] -translate-x-1/2 rounded-[4px] bg-gradient-to-b from-[#4a4658] to-[#2c2838]" />
+                <div className="absolute top-1/2 left-0 h-[30px] w-full -translate-y-1/2 rounded-[4px] bg-gradient-to-b from-[#4a4658] to-[#2c2838]" />
+                <div className="absolute left-1/2 top-1/2 h-[24px] w-[24px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1f1c2a]" />
+              </div>
+
+{/* A = READY (go), B = NOT READY (dodges) */}
+             {/* A = READY (go), B = NOT READY (dodges) */}
+             <div className="flex -translate-y-2 items-end gap-6">
+                <div className="flex flex-col items-center gap-3">
+                  <DodgeButton
+                    onDodge={handleDodge}
+                    avoidId="gameboy-container"
+                    // Using NES.css error button for the "dodge" action
+                    className="nes-btn is-error !flex !h-[72px] !w-[72px] !min-w-0 items-center justify-center !p-0 text-2xl"
+                  >
+                    B
+                  </DodgeButton>
+                  <span className="retro text-[10px] text-primary">NOT READY</span>
+                </div>
+                
+                <div className="flex -translate-y-4 flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleReady}
+                    aria-label="Ready — go to the gallery"
+                    // Using NES.css success button for the "ready" action
+                    className="nes-btn is-success !flex !h-[72px] !w-[72px] !min-w-0 items-center justify-center !p-0 text-2xl"
+                  >
+                    A
+                  </button>
+                  <span className="retro text-[10px] text-primary">READY</span>
+                </div>
+              </div>
+              </div>
+
+            {/* START / SELECT pills (decorative) */}
+            <div className="mt-7 flex items-center justify-center gap-6">
+              {["SELECT", "START"].map((c) => (
+                <div key={c} className="flex -rotate-[20deg] flex-col items-center gap-1.5">
+                  <span className="h-[15px] w-[48px] rounded-full bg-gradient-to-b from-[#4a4658] to-[#2c2838]" />
+                  <span className="text-[9px] font-bold tracking-widest text-[#3a6ea5]">
+                    {c}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* heart divider / hint */}
         <div className="flex items-center gap-3">
           <PixelHeart pixel={5} />
-          <p className="retro text-[10px] text-primary sm:text-xs">
-            press start to celebrate us
+          <p className="retro text-xs text-primary sm:text-sm">
+            press A when you&apos;re READY 💖
           </p>
           <PixelHeart pixel={5} />
         </div>
 
-        {/* buttons */}
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-5">
-          <Button
-            size="lg"
-            onClick={handleReady}
-            className="pixel-btn retro bg-mint text-primary text-base md:text-lg px-8 py-6"
-          >
-            <span className="inline-flex items-center gap-2">
-              READY
-              <PixelHeart pixel={4} />
-            </span>
-          </Button>
-
-          <DodgeButton onDodge={handleDodge}>NOT READY</DodgeButton>
-        </div>
-
         {/* teasing line */}
         <p
-          className="retro h-6 text-[10px] text-primary transition-opacity duration-200 sm:text-xs"
+          className="retro h-6 text-xs text-primary transition-opacity duration-200 sm:text-sm"
           style={{ opacity: teaseIdx === null ? 0 : 1 }}
         >
           {teaseIdx === null ? " " : TEASES[teaseIdx]}

@@ -232,7 +232,7 @@ export default async function GalleryPage() {
       <header className="sticky top-0 z-50 flex items-center justify-between gap-2 border-b-[6px] border-foreground bg-pastel-blue/90 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
         <Link
           href="/"
-          className="pixel-btn retro relative inline-flex shrink-0 items-center gap-1.5 bg-secondary px-3 py-2.5 text-[9px] text-primary sm:gap-2 sm:px-4 sm:py-3 sm:text-xs"
+          className="pixel-btn retro relative inline-flex shrink-0 items-center gap-1.5 bg-secondary px-3 py-2.5 text-[11px] text-primary sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
         >
           ← BACK
           <PixelBorder t={5} />
@@ -242,7 +242,7 @@ export default async function GalleryPage() {
           <span className="shrink-0">
             <PixelCrown pixel={4} />
           </span>
-          <h1 className="retro whitespace-nowrap text-[9px] text-primary sm:text-sm">
+          <h1 className="retro whitespace-nowrap text-[11px] text-primary sm:text-base">
             OUR MEMORIES
           </h1>
           <span className="shrink-0">
@@ -255,20 +255,21 @@ export default async function GalleryPage() {
           href="/invitation"
           aria-label="Open your invitation"
           title="A little something for you…"
-          className="pixel-btn group flex shrink-0 items-center gap-2"
+          className="pixel-btn retro group relative flex shrink-0 items-center gap-2 bg-rose px-3 py-2.5 text-primary sm:px-4 sm:py-3"
         >
-          <span className="retro hidden text-[8px] text-primary/70 transition-colors group-hover:text-primary md:inline">
+          <span className="retro hidden text-[10px] text-primary transition-colors md:inline">
             tap me 💌
           </span>
           <span className="animate-bob transition-transform group-hover:scale-125 group-hover:rotate-12">
-            <PixelLily pixel={4} />
+            <PixelLily pixel={5} />
           </span>
+          <PixelBorder t={5} />
         </Link>
       </header>
 
       {/* intro line */}
       <div className="relative z-10 px-5 pt-8 text-center">
-        <p className="retro text-[10px] leading-relaxed text-primary sm:text-xs">
+        <p className="retro text-xs leading-relaxed text-primary sm:text-sm">
           every little moment, spread out across our journey 📍💖
         </p>
       </div>
@@ -289,7 +290,7 @@ export default async function GalleryPage() {
           <PixelHeart pixel={6} />
           <PixelHeart pixel={5} />
         </div>
-        <p className="retro text-center text-[9px] leading-relaxed text-primary sm:text-[10px]">
+        <p className="retro text-center text-[11px] leading-relaxed text-primary sm:text-xs">
           happy anniversary, my princess 👑
         </p>
       </footer>

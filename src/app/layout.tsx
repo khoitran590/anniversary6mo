@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Pixelify_Sans } from "next/font/google";
 import Script from "next/script";
+// NES.css is imported inside globals.css into a dedicated cascade layer so its
+// Bootstrap-Reboot reset can't override Tailwind utilities (e.g. `flex`).
 import "./globals.css";
 
 const pressStart = Press_Start_2P({

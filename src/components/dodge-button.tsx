@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-
-import { Button } from "@/components/ui/8bit/button";
 import { cn } from "@/lib/utils";
 
 /** how close (px) the cursor may get before the button flees */
@@ -15,9 +13,11 @@ interface DodgeButtonProps {
   className?: string;
   /** fired every time the button successfully dodges the cursor */
   onDodge?: (count: number) => void;
+  /** ID of a DOM element to avoid overlapping (e.g., the Game Boy container) */
+  avoidId?: string;
 }
 
-export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) {
+export function DodgeButton({ children, className, onDodge, avoidId }: DodgeButtonProps) {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   // the button's resting position/size in viewport coords (offset === 0)
   const homeRef = React.useRef<{
@@ -30,10 +30,6 @@ export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) 
   const [offset, setOffset] = React.useState({ x: 0, y: 0 });
   const dodgeCount = React.useRef(0);
 
-  // Capture the resting (un-transformed) position. We derive it from the live
-  // rect minus the currently-applied offset, so it stays correct even if the
-  // layout shifts — but we never read the rect mid-flee, which would be
-  // mid-CSS-transition and give a wrong (interpolated) value.
   const measureHome = React.useCallback(() => {
     const el = wrapperRef.current;
     if (!el) return;
@@ -51,7 +47,6 @@ export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) 
     const onResize = () => {
       offsetRef.current = { x: 0, y: 0 };
       setOffset({ x: 0, y: 0 });
-      // re-measure after the reset paints
       requestAnimationFrame(measureHome);
     };
     window.addEventListener("resize", onResize);
@@ -67,21 +62,54 @@ export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) 
       const maxLeft = window.innerWidth - w - EDGE_MARGIN;
       const maxTop = window.innerHeight - h - EDGE_MARGIN;
 
-      // pick a random landing spot that's safely away from the cursor
+      // Get the bounding box of the element we want to avoid
+      let avoidRect: DOMRect | null = null;
+      if (avoidId) {
+        const avoidEl = document.getElementById(avoidId);
+        if (avoidEl) {
+          avoidRect = avoidEl.getBoundingClientRect();
+        }
+      }
+
       let targetLeft = home.left;
       let targetTop = home.top;
-      for (let i = 0; i < 16; i++) {
-        const candLeft =
-          EDGE_MARGIN + Math.random() * Math.max(1, maxLeft - EDGE_MARGIN);
-        const candTop =
-          EDGE_MARGIN + Math.random() * Math.max(1, maxTop - EDGE_MARGIN);
+      
+      // Increased to 50 attempts since avoiding a large central element 
+      // narrows down the safe zones significantly.
+      for (let i = 0; i < 50; i++) {
+        const candLeft = EDGE_MARGIN + Math.random() * Math.max(1, maxLeft - EDGE_MARGIN);
+        const candTop = EDGE_MARGIN + Math.random() * Math.max(1, maxTop - EDGE_MARGIN);
+        
         targetLeft = candLeft;
         targetTop = candTop;
-        const dist = Math.hypot(
+
+        // 1. Check cursor distance
+        const distToCursor = Math.hypot(
           cursorX - (candLeft + w / 2),
           cursorY - (candTop + h / 2)
         );
-        if (dist > THRESHOLD * 2.2) break;
+        const isSafeFromCursor = distToCursor > THRESHOLD * 2.2;
+
+        // 2. Check collision with the avoidance element (Game Boy)
+        let isOverlappingAvoid = false;
+        if (avoidRect) {
+          const buttonRight = candLeft + w;
+          const buttonBottom = candTop + h;
+          // Add a 20px padding around the Game Boy so it doesn't sit right on the edge
+          const pad = 20;
+
+          isOverlappingAvoid = !(
+            buttonRight < avoidRect.left - pad ||
+            candLeft > avoidRect.right + pad ||
+            buttonBottom < avoidRect.top - pad ||
+            candTop > avoidRect.bottom + pad
+          );
+        }
+
+        // If it's safe from the cursor AND not overlapping the Game Boy, we found our spot!
+        if (isSafeFromCursor && !isOverlappingAvoid) {
+          break;
+        }
       }
 
       const next = { x: targetLeft - home.left, y: targetTop - home.top };
@@ -90,10 +118,9 @@ export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) 
       dodgeCount.current += 1;
       onDodge?.(dodgeCount.current);
     },
-    [onDodge]
+    [onDodge, avoidId]
   );
 
-  // chase detection: if the cursor wanders within range, run away
   React.useEffect(() => {
     const handleMove = (e: MouseEvent) => {
       const el = wrapperRef.current;
@@ -109,7 +136,6 @@ export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) 
     return () => window.removeEventListener("mousemove", handleMove);
   }, [flee]);
 
-  // touch / direct-tap fallback (no hover on mobile)
   const handleTouch = (e: React.TouchEvent) => {
     const t = e.touches[0] ?? e.changedTouches[0];
     if (t) flee(t.clientX, t.clientY);
@@ -120,25 +146,20 @@ export function DodgeButton({ children, className, onDodge }: DodgeButtonProps) 
       ref={wrapperRef}
       onTouchStart={handleTouch}
       onClick={(e) => {
-        // if they somehow land a click, dodge instead of doing anything
         e.preventDefault();
         flee(e.clientX, e.clientY);
       }}
       className="inline-block will-change-transform transition-transform duration-150 ease-out"
       style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
     >
-      <Button
+      <button
         type="button"
-        size="lg"
         tabIndex={-1}
         aria-label="Not ready yet (this button keeps running away)"
-        className={cn(
-          "retro bg-rose text-primary-foreground text-base md:text-lg px-7 py-6 cursor-not-allowed",
-          className
-        )}
+        className={cn(className)}
       >
         {children}
-      </Button>
+      </button>
     </div>
   );
 }
