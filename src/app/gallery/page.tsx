@@ -21,15 +21,23 @@ import { MapGallery } from "@/components/map-gallery";
 export const dynamic = "force-static";
 
 /**
- * Location-based photo groups with coordinates and captions.
- * Each location can have multiple photos. Photos are matched by index order.
+ * Location-based photo groups. Each location can hold multiple photos.
+ *
+ * 📍 To pin a place, just write its name in `place` — any search you'd type
+ *    into Google Maps works ("Joshua Tree National Park, CA", "Griffith
+ *    Observatory", "1600 Pennsylvania Ave"). It's auto-converted to map
+ *    coordinates for you, so you never deal with latitude/longitude.
+ *    (If you ever want pixel-perfect placement you can still pass `lat`/`lng`
+ *    instead, but `place` is the easy way.)
+ *
+ * `photoIndices` picks which photos (by sorted file order, 0 = first file)
+ * belong here, and `captions` lines up with them one-to-one.
  */
 const LOCATIONS = [
   {
     id: "home",
     name: "Home 🏠",
-    lat: 34.0522,
-    lng: -118.2437,
+    place: "Los Angeles, CA",
     captions: [
       "Your first gift for me ☀️",
       "First bouquet of flowers 💐",
@@ -39,8 +47,7 @@ const LOCATIONS = [
   {
     id: "joshua-tree",
     name: "Joshua Tree 🌵",
-    lat: 34.1411,
-    lng: -116.2023,
+    place: "Joshua Tree National Park, CA",
     captions: [
       "Early anni trip to Joshua Tree 🌵",
       "Our first milky way photo 🌌",
@@ -50,8 +57,7 @@ const LOCATIONS = [
   {
     id: "edc",
     name: "EDC 🎉",
-    lat: 36.0726,
-    lng: -115.1843,
+    place: "Las Vegas Motor Speedway, NV",
     captions: [
       "Our first EDC together 🎉",
     ],
@@ -60,8 +66,7 @@ const LOCATIONS = [
   {
     id: "hiking",
     name: "Hiking Trail 🥾",
-    lat: 34.4265,
-    lng: -117.4473,
+    place: "Angeles National Forest, CA",
     captions: [
       "1st actual hiking trip 🥾",
       "My favorite holding hand photo 🙈",
@@ -71,8 +76,7 @@ const LOCATIONS = [
   {
     id: "studio",
     name: "Photo Studio 📸",
-    lat: 34.0195,
-    lng: -118.4912,
+    place: "Santa Monica, CA",
     captions: [
       "Our first film photo 🎥",
       "I admire your beauty 💋",
@@ -83,8 +87,7 @@ const LOCATIONS = [
   {
     id: "flowers",
     name: "Flower Shop 🌸",
-    lat: 34.0522,
-    lng: -118.2650,
+    place: "Downtown Los Angeles Flower District, CA",
     captions: [
       "Made another bouquet just for GF day 💖",
       "Just because bouquet 🌸",
@@ -94,8 +97,7 @@ const LOCATIONS = [
   {
     id: "birthday",
     name: "Birthday Spot 🎁",
-    lat: 34.0628,
-    lng: -118.4473,
+    place: "Beverly Hills, CA",
     captions: [
       "Your birthday gift 🎁",
     ],
@@ -104,8 +106,7 @@ const LOCATIONS = [
   {
     id: "memories",
     name: "Special Moment 💕",
-    lat: 33.9733,
-    lng: -118.3910,
+    place: "Manhattan Beach, CA",
     captions: [
       "I love how we look at each other 💕",
     ],
@@ -138,6 +139,45 @@ function getPhotos(): string[] {
   }
 }
 
+/**
+ * Turn a written place name into map coordinates — at build time, using the
+ * free OpenStreetMap (Nominatim) service. This is why you can just type a place
+ * name in LOCATIONS above and never deal with latitude/longitude, and why no
+ * extra Google "Geocoding API" needs to be enabled on your key.
+ */
+type ResolvedLocation = (typeof LOCATIONS)[number] & { lat?: number; lng?: number };
+
+async function geocodePlace(place: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+      place
+    )}`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "anniversary-gallery/1.0 (personal site)" },
+      // Cache the lookup so repeated builds don't re-hit the service.
+      next: { revalidate: false },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Array<{ lat: string; lon: string }>;
+    const hit = data[0];
+    if (!hit) return null;
+    return { lat: parseFloat(hit.lat), lng: parseFloat(hit.lon) };
+  } catch {
+    return null;
+  }
+}
+
+/** Resolve every location's `place` to coordinates, in order (Nominatim asks
+ *  callers to keep it to ~1 request/second, and we only have a handful). */
+async function resolveLocations(): Promise<ResolvedLocation[]> {
+  const out: ResolvedLocation[] = [];
+  for (const loc of LOCATIONS) {
+    const coords = loc.place ? await geocodePlace(loc.place) : null;
+    out.push({ ...loc, ...(coords ?? {}) });
+  }
+  return out;
+}
+
 /* Scattered 8-bit flowers + hearts that drift behind the whole page. Spread
    down the full scroll height (top%) and out to both edges (left%) so the
    garden frames the map and photos without ever sitting on top of them.
@@ -164,8 +204,9 @@ const SPRITES = [
   { el: <PixelHeart pixel={5} color="#ff8fb8" highlight="#fff" />, top: "96%", left: "92%", cls: "animate-float" },
 ];
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
   const photos = getPhotos();
+  const locations = await resolveLocations();
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-pastel-blue">
@@ -191,7 +232,7 @@ export default function GalleryPage() {
       <header className="sticky top-0 z-50 flex items-center justify-between gap-2 border-b-[6px] border-foreground bg-pastel-blue/90 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
         <Link
           href="/"
-          className="retro relative inline-flex shrink-0 items-center gap-1.5 bg-secondary px-3 py-2.5 text-[9px] text-primary active:translate-y-0.5 sm:gap-2 sm:px-4 sm:py-3 sm:text-xs"
+          className="pixel-btn retro relative inline-flex shrink-0 items-center gap-1.5 bg-secondary px-3 py-2.5 text-[9px] text-primary sm:gap-2 sm:px-4 sm:py-3 sm:text-xs"
         >
           ← BACK
           <PixelBorder t={5} />
@@ -214,12 +255,12 @@ export default function GalleryPage() {
           href="/invitation"
           aria-label="Open your invitation"
           title="A little something for you…"
-          className="group flex shrink-0 items-center gap-2 active:translate-y-0.5"
+          className="pixel-btn group flex shrink-0 items-center gap-2"
         >
           <span className="retro hidden text-[8px] text-primary/70 transition-colors group-hover:text-primary md:inline">
             tap me 💌
           </span>
-          <span className="animate-bob transition-transform group-hover:scale-110">
+          <span className="animate-bob transition-transform group-hover:scale-125 group-hover:rotate-12">
             <PixelLily pixel={4} />
           </span>
         </Link>
@@ -235,7 +276,7 @@ export default function GalleryPage() {
       {/* map gallery section */}
       <section className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-28 pt-6">
         <MapGallery
-          locations={LOCATIONS}
+          locations={locations}
           photos={photos}
           tints={TINTS}
         />

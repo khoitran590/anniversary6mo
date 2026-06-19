@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PixelBorder } from "@/components/pixel-frame";
+import { MusicPlayer } from "@/components/music-player";
 import {
   PixelCrown,
   PixelHeart,
@@ -14,6 +15,11 @@ export const metadata: Metadata = {
   title: "You're Invited 💌",
   description: "A little invitation for my princess.",
 };
+
+/* 🎵 Paste your YouTube playlist link here (or just the list id).
+   e.g. "https://www.youtube.com/playlist?list=PLxxxxxxxxxxxx"
+   Leave it blank for now and the player shows a friendly placeholder. */
+const PLAYLIST_LINK = "https://www.youtube.com/watch?v=ZEcqHA7dbwM";
 
 const DETAILS: {
   label: string;
@@ -41,7 +47,7 @@ const DECOR = [
 
 export default function InvitationPage() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-pastel-pink px-5 py-20">
+    <main className="relative flex min-h-screen flex-col items-center justify-start overflow-x-hidden bg-pastel-pink px-5 py-20">
       {/* floating pixel decorations */}
       <div className="pointer-events-none absolute inset-0">
         {DECOR.map((d, i) => (
@@ -54,7 +60,7 @@ export default function InvitationPage() {
       {/* back to gallery */}
       <Link
         href="/gallery"
-        className="retro absolute left-5 top-5 z-20 inline-flex items-center gap-2 bg-secondary px-4 py-3 text-[10px] text-primary active:translate-y-0.5 sm:text-xs"
+        className="pixel-btn retro absolute left-5 top-5 z-20 inline-flex items-center gap-2 bg-secondary px-4 py-3 text-[10px] text-primary sm:text-xs"
       >
         ← BACK
         <PixelBorder t={5} />
@@ -112,6 +118,9 @@ export default function InvitationPage() {
 
           <PixelBorder t={6} />
         </div>
+
+        {/* music player card — set the song mood for the date 🎶 */}
+        <MusicPlayer playlist={PLAYLIST_LINK} />
 
         {/* footer */}
         <div className="flex flex-col items-center gap-3">

@@ -214,7 +214,7 @@ export default function LandingPage() {
           <Button
             size="lg"
             onClick={handleReady}
-            className="retro bg-mint text-primary text-base md:text-lg px-8 py-6"
+            className="pixel-btn retro bg-mint text-primary text-base md:text-lg px-8 py-6"
           >
             <span className="inline-flex items-center gap-2">
               READY

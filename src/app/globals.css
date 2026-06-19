@@ -196,11 +196,78 @@ img {
   animation: pixel-twinkle 2.2s steps(3) infinite;
 }
 
+/* ---------- playful button interactions ----------
+   A bouncy spring (overshooting cubic-bezier) gives every press a satisfying
+   squish-and-snap. Applied to all the chunky retro buttons. */
+.pixel-btn {
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+.pixel-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+.pixel-btn:active {
+  transform: translateY(2px) scale(0.92);
+}
+
+/* one-shot wiggle + pop, toggled by adding the class on click (JS removes it
+   when the animation ends so it can re-fire on the next press). */
+@keyframes pixel-jiggle {
+  0% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-6deg) scale(1.08); }
+  40% { transform: rotate(5deg) scale(1.08); }
+  60% { transform: rotate(-3deg) scale(1.04); }
+  80% { transform: rotate(2deg) scale(1.02); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.animate-jiggle {
+  animation: pixel-jiggle 0.5s ease-in-out;
+}
+
+/* heart that pulses outward, e.g. when a memory pin is selected */
+@keyframes pixel-heartbeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.25); }
+  50% { transform: scale(0.95); }
+  75% { transform: scale(1.12); }
+}
+.animate-heartbeat {
+  animation: pixel-heartbeat 0.6s ease-in-out;
+}
+
+/* ---------- music player ---------- */
+
+/* chunky equalizer bars that bounce while a track is playing */
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+.eq-bar {
+  transform-origin: bottom center;
+  animation: eq-bounce 0.7s ease-in-out infinite;
+}
+
+/* horizontal marquee for long track titles on the little "screen" */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 9s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
   .animate-bob,
   .animate-pop,
-  .animate-twinkle {
+  .animate-twinkle,
+  .animate-jiggle,
+  .animate-heartbeat,
+  .eq-bar,
+  .animate-marquee {
     animation: none;
+  }
+  .pixel-btn {
+    transition: none;
   }
 }

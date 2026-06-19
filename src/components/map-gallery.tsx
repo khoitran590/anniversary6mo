@@ -7,8 +7,12 @@ import { PixelHeart } from "./pixel-art";
 type Location = {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
+  /** A place name written in the page — e.g. "Joshua Tree National Park, CA".
+   *  Resolved to coordinates for you at build time, so you never touch lat/lng. */
+  place?: string;
+  /** Coordinates, resolved from `place` at build time (or set manually). */
+  lat?: number;
+  lng?: number;
   captions: string[];
   photoIndices: number[];
 };
@@ -65,15 +69,9 @@ export function MapGallery({ locations, photos, tints }: MapGalleryProps) {
         return;
       }
 
-      // Calculate center of all locations (fallback before bounds fit)
-      const center = {
-        lat: locations.reduce((sum, loc) => sum + loc.lat, 0) / locations.length,
-        lng: locations.reduce((sum, loc) => sum + loc.lng, 0) / locations.length,
-      };
-
       const mapInstance = new googleMaps.Map(container, {
-        zoom: 6,
-        center,
+        zoom: 4,
+        center: { lat: 37.5, lng: -119 }, // gentle US-west default before bounds fit
         styles: [
           {
             featureType: "all",
@@ -95,11 +93,18 @@ export function MapGallery({ locations, photos, tints }: MapGalleryProps) {
 
       map.current = mapInstance;
 
-      // Add markers for each location, tracking bounds so every pin fits in view
+      // Drop a pin for every location that resolved to coordinates, tracking
+      // bounds so they all fit in view.
       const bounds = new googleMaps.LatLngBounds();
+      let placed = 0;
       locations.forEach((location) => {
+        if (typeof location.lat !== "number" || typeof location.lng !== "number") {
+          return;
+        }
+        const coords = { lat: location.lat, lng: location.lng };
+
         const marker = new googleMaps.Marker({
-          position: { lat: location.lat, lng: location.lng },
+          position: coords,
           map: mapInstance,
           title: location.name,
           icon: {
@@ -116,13 +121,14 @@ export function MapGallery({ locations, photos, tints }: MapGalleryProps) {
           setSelectedLocation(location);
         });
 
-        bounds.extend({ lat: location.lat, lng: location.lng });
+        bounds.extend(coords);
+        placed += 1;
       });
 
       // Re-fit so every pin stays visible — both now and whenever the viewport
       // changes (e.g. a phone rotating between portrait and landscape).
       const fit = () => {
-        if (locations.length > 1) mapInstance.fitBounds(bounds, 48);
+        if (placed > 1) mapInstance.fitBounds(bounds, 48);
       };
       fit();
       return fit;
@@ -185,8 +191,14 @@ export function MapGallery({ locations, photos, tints }: MapGalleryProps) {
       <div className="flex flex-col gap-4">
         {selectedLocation ? (
           <>
-            <div className="retro rounded-lg border-4 border-foreground bg-secondary p-4 shadow-md">
-              <h3 className="text-sm font-bold text-primary">
+            <div
+              key={selectedLocation.id}
+              className="retro animate-pop rounded-lg border-4 border-foreground bg-secondary p-4 shadow-md"
+            >
+              <h3 className="flex items-center gap-2 text-sm font-bold text-primary">
+                <span className="inline-block animate-heartbeat">
+                  <PixelHeart pixel={4} color="#ff69b4" />
+                </span>
                 {selectedLocation.name}
               </h3>
               <p className="mt-1 text-[10px] text-primary/80">
