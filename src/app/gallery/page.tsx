@@ -36,13 +36,22 @@ export const dynamic = "force-static";
 const LOCATIONS = [
   {
     id: "home",
-    name: "Home 🏠",
-    place: "Los Angeles, CA",
+    name: "Valentine's Day 💖",
+    place: "Monterey, CA",
     captions: [
       "Your first gift for me ☀️",
+      "Look how happy you are 🤩",
+    ],
+    photoIndices: [10, 15],
+  },
+  {
+  id: "signal-hill",
+    name: "Flower",
+    place: "Signal Hill, Long Beach, CA",
+    captions: [
       "First bouquet of flowers 💐",
     ],
-    photoIndices: [0, 1],
+    photoIndices: [1],
   },
   {
     id: "joshua-tree",
@@ -66,7 +75,7 @@ const LOCATIONS = [
   {
     id: "hiking",
     name: "Hiking Trail 🥾",
-    place: "Angeles National Forest, CA",
+    place: "Two Trees Trail, Riverside, CA",
     captions: [
       "1st actual hiking trip 🥾",
       "My favorite holding hand photo 🙈",
@@ -76,37 +85,37 @@ const LOCATIONS = [
   {
     id: "studio",
     name: "Photo Studio 📸",
-    place: "Santa Monica, CA",
+    place: "7221 Garden Grove Blvd, Garden Grove, CA",
     captions: [
       "Our first film photo 🎥",
-      "I admire your beauty 💋",
-      "How I imagine us posing in the future 🤩",
+      "Our first Tet together 💋",
     ],
-    photoIndices: [6, 11, 12],
+    photoIndices: [6, 11],
   },
   {
-    id: "flowers",
-    name: "Flower Shop 🌸",
-    place: "Downtown Los Angeles Flower District, CA",
+    id: "balboa-park",
+    name: "Balboa Park 📸",
+    place: "San Diego, CA",
     captions: [
-      "Made another bouquet just for GF day 💖",
-      "Just because bouquet 🌸",
+      "How I imagine us posing in the future 🤩",
     ],
-    photoIndices: [4, 5],
+    photoIndices: [12],
   },
   {
     id: "birthday",
     name: "Birthday Spot 🎁",
-    place: "Beverly Hills, CA",
+    place: "12241 Cliffwood Avenue, Garden Grove, CA",
     captions: [
       "Your birthday gift 🎁",
+      "Made another bouquet just for GF day 💖",
+      "Just because bouquet 🌸",
     ],
-    photoIndices: [7],
+    photoIndices: [7, 4, 5],
   },
   {
     id: "memories",
     name: "Special Moment 💕",
-    place: "Manhattan Beach, CA",
+    place: "Los Angeles, CA",
     captions: [
       "I love how we look at each other 💕",
     ],
@@ -242,8 +251,8 @@ export default async function GalleryPage() {
           <span className="shrink-0">
             <PixelCrown pixel={4} />
           </span>
-          <h1 className="retro whitespace-nowrap text-[11px] text-primary sm:text-base">
-            OUR MEMORIES
+          <h1 className="retro whitespace-nowrap text-[14px] text-primary sm:text-base">
+            SOME OF OUR MEMORIES
           </h1>
           <span className="shrink-0">
             <PixelCrown pixel={4} />
@@ -255,15 +264,14 @@ export default async function GalleryPage() {
           href="/invitation"
           aria-label="Open your invitation"
           title="A little something for you…"
-          className="pixel-btn retro group relative flex shrink-0 items-center gap-2 bg-rose px-3 py-2.5 text-primary sm:px-4 sm:py-3"
+          className="pixel-btn retro group flex shrink-0 items-center gap-2 text-primary"
         >
-          <span className="retro hidden text-[10px] text-primary transition-colors md:inline">
+          <span className="retro hidden text-[11px] text-primary transition-colors md:inline">
             tap me 💌
           </span>
           <span className="animate-bob transition-transform group-hover:scale-125 group-hover:rotate-12">
-            <PixelLily pixel={5} />
+            <PixelLily pixel={6} />
           </span>
-          <PixelBorder t={5} />
         </Link>
       </header>
 
