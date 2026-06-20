@@ -278,7 +278,7 @@ export default async function GalleryPage() {
       {/* intro line */}
       <div className="relative z-10 px-5 pt-8 text-center">
         <p className="retro text-xs leading-relaxed text-primary sm:text-sm">
-          every little moment, spread out across our journey 📍💖
+          Every little moment, spread out across our journey 📍💖
         </p>
       </div>
 
